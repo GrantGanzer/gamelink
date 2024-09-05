@@ -12,10 +12,12 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 
-import com.grant.gamelink.mvc.models.LoginUser;
 import com.grant.gamelink.mvc.models.Invitation;
+import com.grant.gamelink.mvc.models.LoginUser;
+import com.grant.gamelink.mvc.models.Reply;
 import com.grant.gamelink.mvc.models.User;
 import com.grant.gamelink.mvc.services.InvitationService;
+import com.grant.gamelink.mvc.services.ReplyService;
 import com.grant.gamelink.mvc.services.UserService;
 
 import jakarta.servlet.http.HttpSession;
@@ -29,6 +31,9 @@ public class UserController {
 
 	@Autowired
 	InvitationService invitationservice;
+
+	@Autowired
+	ReplyService replyservice;
 
 	@GetMapping("/")
 	public String registration(Model model) {
@@ -163,45 +168,35 @@ public class UserController {
 	}
 
 	@GetMapping("/invitations/{iid}")
-	public String details(Model model, @PathVariable("iid") Long iid, HttpSession session) {
+	public String details(Model model, @PathVariable("iid") Long iid, HttpSession session,
+			@ModelAttribute("Reply") Reply reply) {
 		Long userId = (Long) session.getAttribute("userId");
 		if (userId == null) {
 			return "redirect:/";
 		} else {
 			User user = userservice.findUser(userId);
 			Invitation invitation = invitationservice.findInvitation(iid);
-			Boolean rsvp = false;
+			Boolean replied = false;
 			Boolean confirmed = false;
 			if (invitation == null) {
 				return "redirect:/invitations";
 			} else {
-				List<User> gl = invitation.getReplies();
-				List<User> glf = invitation.getRepliesfinal();
-				if (glf.contains(user)) {
-					rsvp = true;
-					confirmed = true;
-					model.addAttribute("invitation", invitation);
-					model.addAttribute("user", user);
-					model.addAttribute("rsvp", rsvp);
-					model.addAttribute("confirmed", confirmed);
-					return "InvitationDetails.jsp";
-				} else if (gl.contains(user)) {
-					rsvp = true;
-					model.addAttribute("invitation", invitation);
-					model.addAttribute("user", user);
-					model.addAttribute("rsvp", rsvp);
-					model.addAttribute("confirmed", confirmed);
-					return "InvitationDetails.jsp";
-
-				} else {
-
-					model.addAttribute("invitation", invitation);
-					model.addAttribute("user", user);
-					model.addAttribute("rsvp", rsvp);
-					model.addAttribute("confirmed", confirmed);
-					return "InvitationDetails.jsp";
-
+				List<Reply> replylist = invitation.getReplies();
+				for (Reply r : replylist) {
+					if (r.getUser() == user) {
+						replied = true;
+						if (r.getConfirmed() == true) {
+							confirmed = true;
+						}
+					}
 				}
+				model.addAttribute("invitation", invitation);
+				model.addAttribute("user", user);
+				model.addAttribute("replied", replied);
+				model.addAttribute("confirmed", confirmed);
+				model.addAttribute("replylist", replylist);
+				return "InvitationDetails.jsp";
+
 			}
 		}
 	}
@@ -221,8 +216,8 @@ public class UserController {
 				if (invitationuserid != user.getId()) {
 					return "redirect:/invitations";
 				} else {
-					List<User> replies = invitation.getReplies();
-					List<User> finalReplies = invitation.getRepliesfinal();
+					List<User> replies = invitation.getRsvps();
+					List<User> finalReplies = invitation.getFinalrsvps();
 					model.addAttribute("invitation", invitation);
 					model.addAttribute("user", user);
 					model.addAttribute("replies", replies);
@@ -232,6 +227,7 @@ public class UserController {
 			}
 		}
 	}
+
 	@GetMapping("/invitations/reply/{iid}/{uid}")
 	public String rsvp(@PathVariable("uid") Long uid, @PathVariable("iid") Long iid, HttpSession session) {
 		Long userId = (Long) session.getAttribute("userId");
@@ -247,15 +243,44 @@ public class UserController {
 		} else if (currUserid == thisInvitation.getAdminuser().getId()) {
 			return "redirect:/invitations";
 		} else {
-			List<User> replies = thisInvitation.getReplies();
-			List<User> repliesFInal = thisInvitation.getRepliesfinal();
+			List<User> replies = thisInvitation.getRsvps();
+			List<User> repliesFInal = thisInvitation.getFinalrsvps();
 			if (replies.contains(thisUser) || repliesFInal.contains(thisUser)) {
 				return "redirect:/invitations/{iid}";
 			} else {
-				thisInvitation.getReplies().add(thisUser);
+				thisInvitation.getRsvps().add(thisUser);
 				invitationservice.updateInvitation(thisInvitation, iid);
 				return "redirect:/invitations";
 			}
+		}
+	}
+
+	@PostMapping("/invitations/reply/{iid}/{uid}")
+	public String savereply(@PathVariable("iid") Long iid, @Valid @ModelAttribute("Reply") Reply reply,
+			BindingResult result, Model model, HttpSession session) {
+		Long userId = (Long) session.getAttribute("userId");
+		if (result.hasErrors()) {
+			return "redirect:/invitations";
+		} else {
+			User user = (User) userservice.findUser(userId);
+			Invitation invitation = invitationservice.findInvitation(iid);
+			reply.setUser(user);
+			reply.setInvitation(invitation);
+			replyservice.createReply(reply);
+			return "redirect:/invitations";
+		}
+	}
+
+	@PutMapping("/invitations/reply/confirm/{rid}/{iid}")
+	public String confirm(@Valid @ModelAttribute("Reply") Reply reply, BindingResult result, Model model,
+			@PathVariable("rid") Long rid, @PathVariable("iid") Long iid, HttpSession session) {
+		Long userId = (Long) session.getAttribute("userId");
+		if (userId == null) {
+			return "redirect:/";
+		} else {
+			System.out.print("here");
+			replyservice.updateReply(reply, rid);
+			return "redirect:/invitations/{iid}";
 		}
 	}
 
@@ -275,18 +300,17 @@ public class UserController {
 		} else if (thisInvitation == null || thisUser == null) {
 			return "redirect:/invitations";
 		} else {
-			List<User> finalReplies = thisInvitation.getRepliesfinal();
+			List<User> finalReplies = thisInvitation.getFinalrsvps();
 			if (finalReplies.contains(thisUser)) {
 				return "redirect:/invitations/replies/{iid}";
 			} else {
-				thisInvitation.getRepliesfinal().add(thisUser);
-				thisInvitation.getReplies().remove(thisUser);
+				thisInvitation.getFinalrsvps().add(thisUser);
+				thisInvitation.getRsvps().remove(thisUser);
 				invitationservice.updateInvitation(thisInvitation, iid);
 				return "redirect:/invitations/replies/{iid}";
 			}
 		}
 	}
-
 
 	@GetMapping("/logout")
 	public String logout(HttpSession session) {

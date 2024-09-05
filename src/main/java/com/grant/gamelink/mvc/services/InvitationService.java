@@ -46,11 +46,10 @@ public class InvitationService {
 			invitation.setGameName(t.getGameName());
 			invitation.setAvailablity(t.getAvailablity());
 			invitation.setPlatform(t.getPlatform());
-			invitation.setGamertag(t.getGamertag());
 			invitation.setDescription(t.getDescription());
 			invitation.setAdminuser(t.getAdminuser());
-			invitation.setReplies(t.getReplies());
-			invitation.setRepliesfinal(t.getRepliesfinal());
+			invitation.setRsvps(t.getRsvps());
+			invitation.setFinalrsvps(t.getFinalrsvps());
 			return invitationRepo.save(invitation);
 		} else {
 			return null;

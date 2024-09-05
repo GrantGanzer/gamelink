@@ -15,6 +15,7 @@ import jakarta.persistence.JoinColumn;
 import jakarta.persistence.JoinTable;
 import jakarta.persistence.ManyToMany;
 import jakarta.persistence.ManyToOne;
+import jakarta.persistence.OneToMany;
 import jakarta.persistence.PrePersist;
 import jakarta.persistence.PreUpdate;
 import jakarta.persistence.Table;
@@ -40,9 +41,6 @@ public class Invitation {
 	@Size(min = 1, max = 255, message = "your platform is required.")
 	private String platform;
 	@NotNull
-	@Size(min = 1, max = 255, message = "your gamertag is required.")
-	private String gamertag;
-	@NotNull
 	@Size(min = 1, max = 5000, message = "A description is required.")
 	private String description;
 
@@ -56,31 +54,34 @@ public class Invitation {
 	@ManyToOne(fetch = FetchType.LAZY)
 	@JoinColumn(name = "user_id")
 	private User adminuser;
+	
+	@OneToMany(mappedBy = "invitation", fetch = FetchType.LAZY)
+	private List<Reply> replies;
 
 	@ManyToMany(fetch = FetchType.LAZY)
-	@JoinTable(name = "replies", joinColumns = @JoinColumn(name = "invitation_id"), inverseJoinColumns = @JoinColumn(name = "user_id"))
-	private List<User> replies;
+	@JoinTable(name = "rsvps", joinColumns = @JoinColumn(name = "invitation_id"), inverseJoinColumns = @JoinColumn(name = "user_id"))
+	private List<User> rsvps;
 
 	@ManyToMany(fetch = FetchType.LAZY)
-	@JoinTable(name = "replylistfinal", joinColumns = @JoinColumn(name = "invitation_id"), inverseJoinColumns = @JoinColumn(name = "user_id"))
-	private List<User> repliesFinal;
+	@JoinTable(name = "rsvplistfinal", joinColumns = @JoinColumn(name = "invitation_id"), inverseJoinColumns = @JoinColumn(name = "user_id"))
+	private List<User> finalrsvps;
 
 	public Invitation() {
 
 	}
 
-	public Invitation(String gameName, String gamertag, String platform, String description, String venue,
+	public Invitation(String gameName, String platform, String description, String venue,
 			String address, String showdate, Date created_at, Date updated_at, User adminuser,
-			List<User> replies, List<User> repliesFinal) {
+			List<Reply> replies, List<User> finalrsvps, List<User> rsvps ) {
 		this.gameName = gameName;
-		this.gamertag = gamertag;
 		this.platform = platform;
 		this.description = description;
 		this.created_at = created_at;
 		this.updated_at = updated_at;
 		this.adminuser = adminuser;
 		this.replies = replies;
-		this.repliesFinal = repliesFinal;
+		this.rsvps = rsvps;
+		this.finalrsvps = finalrsvps;
 
 	}
 
@@ -116,13 +117,6 @@ public class Invitation {
 		this.platform = platform;
 	}
 
-	public String getGamertag() {
-		return gamertag;
-	}
-
-	public void setGamertag(String gamertag) {
-		this.gamertag = gamertag;
-	}
 
 	public Date getCreated_at() {
 		return created_at;
@@ -143,25 +137,36 @@ public class Invitation {
 	public User getAdminuser() {
 		return adminuser;
 	}
+	
 
 	public void setAdminuser(User adminuser) {
 		this.adminuser = adminuser;
 	}
 
-	public List<User> getReplies() {
+	public List<Reply> getReplies() {
 		return replies;
 	}
 
-	public void setReplies(List<User> replies) {
+	public void setReplies(List<Reply> replies) {
 		this.replies = replies;
 	}
 
-	public List<User> getRepliesfinal() {
-		return repliesFinal;
+
+
+	public List<User> getRsvps() {
+		return rsvps;
 	}
 
-	public void setRepliesfinal(List<User> repliesFinal) {
-		this.repliesFinal = repliesFinal;
+	public void setRsvps(List<User> rsvps) {
+		this.rsvps = rsvps;
+	}
+
+	public List<User> getFinalrsvps() {
+		return finalrsvps;
+	}
+
+	public void setFinalrsvps(List<User> finalrsvps) {
+		this.finalrsvps = finalrsvps;
 	}
 
 	@PrePersist

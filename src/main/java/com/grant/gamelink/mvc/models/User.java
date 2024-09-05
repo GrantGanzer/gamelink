@@ -21,6 +21,7 @@ import jakarta.persistence.Table;
 import jakarta.persistence.Transient;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotEmpty;
+import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
 
 @Entity
@@ -42,6 +43,10 @@ public class User {
 	@NotEmpty(message = "Email is required!")
 	@Email(message = "Please enter a valid email!")
 	private String email;
+	
+	@NotNull
+	@Size(min = 1, max = 255, message = "your gamertag is required.")
+	private String gamertag;
 
 	@NotEmpty(message = "Password is required!")
 	@Size(min = 8, max = 128, message = "Password must be between 8 and 128 characters")
@@ -60,31 +65,37 @@ public class User {
 	private Date updated_at;
 
 	@OneToMany(mappedBy = "adminuser", fetch = FetchType.LAZY)
-	private List<Invitation> adminshows;
+	private List<Invitation> admininvitations;
+
+	@OneToMany(mappedBy = "user", fetch = FetchType.LAZY)
+	private List<Reply> replies;
 
 	@ManyToMany(fetch = FetchType.LAZY)
-	@JoinTable(name = "guestlist", joinColumns = @JoinColumn(name = "user_id"), inverseJoinColumns = @JoinColumn(name = "show_id"))
-	private List<Invitation> shows;
+	@JoinTable(name = "rsvps", joinColumns = @JoinColumn(name = "user_id"), inverseJoinColumns = @JoinColumn(name = "invitation_id"))
+	private List<Invitation> invitations;
 
 	@ManyToMany(fetch = FetchType.LAZY)
-	@JoinTable(name = "guestlistfinal", joinColumns = @JoinColumn(name = "user_id"), inverseJoinColumns = @JoinColumn(name = "show_id"))
-	private List<Invitation> finalshows;
+	@JoinTable(name = "rsvplistfinal", joinColumns = @JoinColumn(name = "user_id"), inverseJoinColumns = @JoinColumn(name = "invitation_id"))
+	private List<Invitation> finalinvitations;
 
 	public User() {
 	}
 
 	public User(String firstName, String lastName, String email, String password, String confirm, Date created_at,
-			Date updated_at, List<Invitation> shows, List<Invitation> finalshows, List<Invitation> adminshows) {
-		this.firstName = firstName;
+			Date updated_at, List<Invitation> invitations, List<Invitation> finalinvitations,
+			List<Invitation> admininvitations, List<Reply> replies, String gamertag) {
+		this.firstName = firstName; 
 		this.lastName = lastName;
+		this.gamertag = gamertag;
 		this.email = email;
 		this.password = password;
 		this.confirm = confirm;
 		this.created_at = created_at;
 		this.updated_at = updated_at;
-		this.shows = shows;
-		this.finalshows = finalshows;
-		this.adminshows = adminshows;
+		this.replies = replies;
+		this.invitations = invitations;
+		this.finalinvitations = finalinvitations;
+		this.admininvitations = admininvitations;
 	}
 
 	public Date getCreated_at() {
@@ -103,28 +114,36 @@ public class User {
 		this.id = id;
 	}
 
-	public List<Invitation> getShows() {
-		return shows;
+	public List<Invitation> getAdmininvitations() {
+		return admininvitations;
 	}
 
-	public void setShows(List<Invitation> shows) {
-		this.shows = shows;
+	public void setAdmininvitations(List<Invitation> admininvitations) {
+		this.admininvitations = admininvitations;
 	}
 
-	public List<Invitation> getFinalshows() {
-		return finalshows;
+	public List<Reply> getReplies() {
+		return replies;
 	}
 
-	public void setFinalshows(List<Invitation> finalshows) {
-		this.finalshows = finalshows;
+	public void setReplies(List<Reply> replies) {
+		this.replies = replies;
 	}
 
-	public List<Invitation> getAdminshows() {
-		return adminshows;
+	public List<Invitation> getInvitations() {
+		return invitations;
 	}
 
-	public void setAdminshows(List<Invitation> adminshows) {
-		this.adminshows = adminshows;
+	public void setInvitations(List<Invitation> invitations) {
+		this.invitations = invitations;
+	}
+
+	public List<Invitation> getFinalinvitations() {
+		return finalinvitations;
+	}
+
+	public void setFinalinvitations(List<Invitation> finalinvitations) {
+		this.finalinvitations = finalinvitations;
 	}
 
 	public String getFirstName() {
@@ -141,6 +160,15 @@ public class User {
 
 	public void setLastName(String lastName) {
 		this.lastName = lastName;
+	}
+	
+
+	public String getGamertag() {
+		return gamertag;
+	}
+
+	public void setGamertag(String gamertag) {
+		this.gamertag = gamertag;
 	}
 
 	public String getEmail() {
