@@ -11,9 +11,6 @@ import jakarta.persistence.FetchType;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
-import jakarta.persistence.JoinColumn;
-import jakarta.persistence.JoinTable;
-import jakarta.persistence.ManyToMany;
 import jakarta.persistence.OneToMany;
 import jakarta.persistence.PrePersist;
 import jakarta.persistence.PreUpdate;
@@ -43,7 +40,7 @@ public class User {
 	@NotEmpty(message = "Email is required!")
 	@Email(message = "Please enter a valid email!")
 	private String email;
-	
+
 	@NotNull
 	@Size(min = 1, max = 255, message = "your gamertag is required.")
 	private String gamertag;
@@ -70,21 +67,12 @@ public class User {
 	@OneToMany(mappedBy = "user", fetch = FetchType.LAZY)
 	private List<Reply> replies;
 
-	@ManyToMany(fetch = FetchType.LAZY)
-	@JoinTable(name = "rsvps", joinColumns = @JoinColumn(name = "user_id"), inverseJoinColumns = @JoinColumn(name = "invitation_id"))
-	private List<Invitation> invitations;
-
-	@ManyToMany(fetch = FetchType.LAZY)
-	@JoinTable(name = "rsvplistfinal", joinColumns = @JoinColumn(name = "user_id"), inverseJoinColumns = @JoinColumn(name = "invitation_id"))
-	private List<Invitation> finalinvitations;
-
 	public User() {
 	}
 
 	public User(String firstName, String lastName, String email, String password, String confirm, Date created_at,
-			Date updated_at, List<Invitation> invitations, List<Invitation> finalinvitations,
-			List<Invitation> admininvitations, List<Reply> replies, String gamertag) {
-		this.firstName = firstName; 
+			Date updated_at, List<Invitation> admininvitations, List<Reply> replies, String gamertag) {
+		this.firstName = firstName;
 		this.lastName = lastName;
 		this.gamertag = gamertag;
 		this.email = email;
@@ -93,8 +81,6 @@ public class User {
 		this.created_at = created_at;
 		this.updated_at = updated_at;
 		this.replies = replies;
-		this.invitations = invitations;
-		this.finalinvitations = finalinvitations;
 		this.admininvitations = admininvitations;
 	}
 
@@ -130,22 +116,6 @@ public class User {
 		this.replies = replies;
 	}
 
-	public List<Invitation> getInvitations() {
-		return invitations;
-	}
-
-	public void setInvitations(List<Invitation> invitations) {
-		this.invitations = invitations;
-	}
-
-	public List<Invitation> getFinalinvitations() {
-		return finalinvitations;
-	}
-
-	public void setFinalinvitations(List<Invitation> finalinvitations) {
-		this.finalinvitations = finalinvitations;
-	}
-
 	public String getFirstName() {
 		return firstName;
 	}
@@ -161,7 +131,6 @@ public class User {
 	public void setLastName(String lastName) {
 		this.lastName = lastName;
 	}
-	
 
 	public String getGamertag() {
 		return gamertag;

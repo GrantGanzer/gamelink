@@ -12,8 +12,6 @@ import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
-import jakarta.persistence.JoinTable;
-import jakarta.persistence.ManyToMany;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.OneToMany;
 import jakarta.persistence.PrePersist;
@@ -54,25 +52,16 @@ public class Invitation {
 	@ManyToOne(fetch = FetchType.LAZY)
 	@JoinColumn(name = "user_id")
 	private User adminuser;
-	
+
 	@OneToMany(mappedBy = "invitation", fetch = FetchType.LAZY)
 	private List<Reply> replies;
-
-	@ManyToMany(fetch = FetchType.LAZY)
-	@JoinTable(name = "rsvps", joinColumns = @JoinColumn(name = "invitation_id"), inverseJoinColumns = @JoinColumn(name = "user_id"))
-	private List<User> rsvps;
-
-	@ManyToMany(fetch = FetchType.LAZY)
-	@JoinTable(name = "rsvplistfinal", joinColumns = @JoinColumn(name = "invitation_id"), inverseJoinColumns = @JoinColumn(name = "user_id"))
-	private List<User> finalrsvps;
 
 	public Invitation() {
 
 	}
 
-	public Invitation(String gameName, String platform, String description, String venue,
-			String address, String showdate, Date created_at, Date updated_at, User adminuser,
-			List<Reply> replies, List<User> finalrsvps, List<User> rsvps ) {
+	public Invitation(String gameName, String platform, String description, String venue, String address,
+			String showdate, Date created_at, Date updated_at, User adminuser, List<Reply> replies) {
 		this.gameName = gameName;
 		this.platform = platform;
 		this.description = description;
@@ -80,8 +69,6 @@ public class Invitation {
 		this.updated_at = updated_at;
 		this.adminuser = adminuser;
 		this.replies = replies;
-		this.rsvps = rsvps;
-		this.finalrsvps = finalrsvps;
 
 	}
 
@@ -117,7 +104,6 @@ public class Invitation {
 		this.platform = platform;
 	}
 
-
 	public Date getCreated_at() {
 		return created_at;
 	}
@@ -137,7 +123,6 @@ public class Invitation {
 	public User getAdminuser() {
 		return adminuser;
 	}
-	
 
 	public void setAdminuser(User adminuser) {
 		this.adminuser = adminuser;
@@ -149,24 +134,6 @@ public class Invitation {
 
 	public void setReplies(List<Reply> replies) {
 		this.replies = replies;
-	}
-
-
-
-	public List<User> getRsvps() {
-		return rsvps;
-	}
-
-	public void setRsvps(List<User> rsvps) {
-		this.rsvps = rsvps;
-	}
-
-	public List<User> getFinalrsvps() {
-		return finalrsvps;
-	}
-
-	public void setFinalrsvps(List<User> finalrsvps) {
-		this.finalrsvps = finalrsvps;
 	}
 
 	@PrePersist

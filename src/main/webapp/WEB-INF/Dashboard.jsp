@@ -116,10 +116,6 @@ body {
 							<c:out value="${invitation.getAvailablity()}" />
 						</p>
 						<p>
-							Gamertag:
-							<c:out value="${invitation.getAdminuser().getGamertag()}" />
-						</p>
-						<p>
 							Description:
 							<c:out value="${invitation.getDescription()}" />
 						</p>

@@ -38,7 +38,7 @@ body {
 	margin-bottom: 30px;
 }
 
-.nav h1 {
+.nav h1, h3 {
 	font-size: 2em;
 	color: #ff4500;
 }
@@ -55,7 +55,7 @@ body {
 	color: #ffffff;
 }
 
-.infocard h2, .infocard p {
+.infocard h2, .infocard p, tr {
 	color: #ff4500;
 }
 
@@ -125,7 +125,7 @@ body {
 					</p>
 					<div class="guestinfo">
 						<h2>Players Interested</h2>
-						<table class="table table-striped table-bordered">
+						<table class="table table-bordered">
 							<thead>
 								<tr>
 									<th scope="col">First Name</th>
@@ -154,9 +154,10 @@ body {
 							</tbody>
 						</table>
 						<h2>Confirmed Players</h2>
-						<table class="table table-striped table-bordered">
+						<table class="table table-bordered">
 							<thead>
 								<tr>
+									<th scope="col">First Name</th>
 									<th scope="col">Gamertag</th>
 									<th scope="col">Message</th>
 								</tr>
@@ -165,6 +166,7 @@ body {
 								<c:forEach var="reply" items="${replylist}">
 									<c:if test="${reply.getConfirmed() == true}">
 										<tr>
+											<td>${reply.getUser().getFirstName()}</td>
 											<td>${reply.getUser().getGamertag()}</td>
 											<td>${reply.getMessage()}</td>
 										</tr>
@@ -179,7 +181,7 @@ body {
 					<h2>Invitation Details</h2>
 					<p>Game Name: ${invitation.getGameName()}</p>
 					<p>Platform: ${invitation.getPlatform()}</p>
-					<c:if test="${reply.getConfirmed() == true}">
+					<c:if test="${confirmed == true}">
 						<p>Gamertag: ${invitation.getAdminuser().getGamertag()}</p>
 					</c:if>
 					<p>Availability: ${invitation.getAvailablity()}</p>
@@ -190,7 +192,7 @@ body {
 						<div class="card-body">
 							<p>To join, type your availability below.
 								${invitation.getAdminuser().getFirstName()} will confirm your
-								request!</p>
+								request if they'd like to play!</p>
 						</div>
 					</div>
 					<c:choose>
@@ -210,15 +212,18 @@ body {
 							</form:form>
 						</c:when>
 						<c:when test="${replied == true && confirmed == false}">
-							<a class="btn btn-primary">You've already sent a reply...
-								it's still being confirmed</a>
+							<h2>You've already sent a reply... it's still being
+								confirmed</h2>
 						</c:when>
 						<c:otherwise>
 							<h2>Your reply has been confirmed! See you in the game!</h2>
 							<h3>Confirmed Players</h3>
-							<table class="table table-striped table-bordered">
+							<p>(Feel free to add the other players confirmed for this
+								invitation)</p>
+							<table class="table table-bordered">
 								<thead>
 									<tr>
+										<th scope="col">First Name</th>
 										<th scope="col">Gamertag</th>
 										<th scope="col">Message</th>
 									</tr>
@@ -227,6 +232,7 @@ body {
 									<c:forEach var="reply" items="${replylist}">
 										<c:if test="${reply.getConfirmed() == true}">
 											<tr>
+												<td>${reply.getUser().getFirstName()}</td>
 												<td>${reply.getUser().getGamertag()}</td>
 												<td>${reply.getMessage()}</td>
 											</tr>

@@ -48,8 +48,6 @@ public class InvitationService {
 			invitation.setPlatform(t.getPlatform());
 			invitation.setDescription(t.getDescription());
 			invitation.setAdminuser(t.getAdminuser());
-			invitation.setRsvps(t.getRsvps());
-			invitation.setFinalrsvps(t.getFinalrsvps());
 			return invitationRepo.save(invitation);
 		} else {
 			return null;
